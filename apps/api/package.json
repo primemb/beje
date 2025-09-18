@@ -1,5 +1,5 @@
 {
-  "name": "@beje/beje",
+  "name": "@beje/api",
   "version": "0.0.1",
   "private": true,
   "nx": {
@@ -11,7 +11,7 @@
           "args": [
             "--node-env=production"
           ],
-          "cwd": "apps/beje"
+          "cwd": "apps/api"
         },
         "configurations": {
           "development": {
@@ -28,8 +28,8 @@
         "cache": true,
         "executor": "@nx/js:prune-lockfile",
         "outputs": [
-          "{workspaceRoot}/apps/beje/dist/package.json",
-          "{workspaceRoot}/apps/beje/dist/package-lock.json"
+          "{workspaceRoot}/apps/api/dist/package.json",
+          "{workspaceRoot}/apps/api/dist/package-lock.json"
         ],
         "options": {
           "buildTarget": "build"
@@ -41,7 +41,7 @@
         ],
         "cache": true,
         "outputs": [
-          "{workspaceRoot}/apps/beje/dist/workspace_modules"
+          "{workspaceRoot}/apps/api/dist/workspace_modules"
         ],
         "executor": "@nx/js:copy-workspace-modules",
         "options": {
@@ -63,15 +63,15 @@
           "build"
         ],
         "options": {
-          "buildTarget": "@beje/beje:build",
+          "buildTarget": "@beje/api:build",
           "runBuildTargetDependencies": false
         },
         "configurations": {
           "development": {
-            "buildTarget": "@beje/beje:build:development"
+            "buildTarget": "@beje/api:build:development"
           },
           "production": {
-            "buildTarget": "@beje/beje:build:production"
+            "buildTarget": "@beje/api:build:production"
           }
         }
       },
@@ -79,12 +79,6 @@
         "options": {
           "passWithNoTests": true
         }
-      },
-      "docker:build": {
-        "dependsOn": [
-          "build",
-          "prune"
-        ]
       }
     }
   },

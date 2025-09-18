@@ -1,10 +1,10 @@
 {
-  "name": "@beje/beje-e2e",
+  "name": "@beje/api-e2e",
   "version": "0.0.1",
   "private": true,
   "nx": {
     "implicitDependencies": [
-      "@beje/beje"
+      "@beje/api"
     ],
     "targets": {
       "e2e": {
@@ -13,12 +13,12 @@
           "{projectRoot}/test-output/jest/coverage"
         ],
         "options": {
-          "jestConfig": "apps/beje-e2e/jest.config.ts",
+          "jestConfig": "apps/api-e2e/jest.config.ts",
           "passWithNoTests": true
         },
         "dependsOn": [
-          "@beje/beje:build",
-          "@beje/beje:serve"
+          "@beje/api:build",
+          "@beje/api:serve"
         ]
       }
     }

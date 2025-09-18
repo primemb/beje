@@ -4,16 +4,16 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/beje-e2e"
-    },
-    {
-      "path": "./apps/beje"
-    },
-    {
       "path": "./apps/notification-e2e"
     },
     {
       "path": "./apps/notification"
+    },
+    {
+      "path": "./apps/api-e2e"
+    },
+    {
+      "path": "./apps/api"
     }
   ]
 }
