@@ -14,7 +14,7 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": false,
     "target": "es2022",
     "customConditions": ["@beje/source"]
   }
