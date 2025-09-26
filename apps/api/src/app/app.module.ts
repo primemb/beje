@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { DatabaseModule, DB_CONFIG } from '@beje/database';
 import { ConfigModule } from '@nestjs/config';
+import { ReservationModule } from './reservation/reservation.module';
 
 @Module({
   imports: [
@@ -11,8 +10,9 @@ import { ConfigModule } from '@nestjs/config';
       load: [DB_CONFIG],
     }),
     DatabaseModule,
+    ReservationModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

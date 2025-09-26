@@ -4,12 +4,6 @@
   "files": [],
   "references": [
     {
-      "path": "./apps/notification-e2e"
-    },
-    {
-      "path": "./apps/notification"
-    },
-    {
       "path": "./apps/api-e2e"
     },
     {
@@ -20,6 +14,12 @@
     },
     {
       "path": "./libs/common"
+    },
+    {
+      "path": "./apps/notification-e2e"
+    },
+    {
+      "path": "./apps/notification"
     }
   ]
 }
