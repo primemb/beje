@@ -10,4 +10,5 @@ export interface EmailOptions {
   subject: string;
   text?: string;
   html?: string;
+  metadata?: any;
 }

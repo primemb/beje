@@ -18,7 +18,7 @@ import {
   GetReservationsResponse,
   ReservationStatus,
   NOTIFICATION_SERVICE,
-  NotificationMessage,
+  EmailOptions,
 } from '@beje/common';
 import { parse, format, addMinutes } from 'date-fns';
 
@@ -71,21 +71,18 @@ export class ReservationService {
 
       this.logger.log(`Reservation created: ${reservation.id}`);
 
+      // Send email notification for reservation creation
       this.notificationClient
-        .send<NotificationMessage>('send.batch', {
-          notifications: [
-            {
-              type: 'email',
-              recipient: reservation.email,
-              content: `Your reservation has been created for ${reservation.startTime}`,
-              metadata: {
-                subject: 'Reservation Created',
-              },
-            },
-          ],
+        .send('send.email', {
+          to: reservation.email,
+          subject: 'Reservation Created',
+          text: `Your reservation has been created for ${reservation.startTime}. Reservation ID: ${reservation.id}`,
+          metadata: {
+            reservation,
+          },
         })
         .subscribe((result) => {
-          this.logger.log(`Notification sent: ${JSON.stringify(result)}`);
+          this.logger.log(`Email notification sent: ${JSON.stringify(result)}`);
         });
 
       return {
@@ -152,13 +149,18 @@ export class ReservationService {
     const updated = await this.reservationRepository.update(id, dto);
 
     // Notify user about update
-    this.notificationClient.emit('reservation.updated', {
-      reservationId: id,
-      email: updated.email,
-      phone: updated.phone,
-      pushNotificationKey: updated.pushNotificationKey,
-      changes: dto,
-    });
+    this.notificationClient
+      .send<EmailOptions>('send.email', {
+        to: updated.email,
+        subject: 'Reservation Updated',
+        text: `Your reservation has been updated. new start time: ${updated.startTime}`,
+        metadata: {
+          reservation: updated,
+        },
+      })
+      .subscribe((result) => {
+        this.logger.log(`Update notification sent: ${JSON.stringify(result)}`);
+      });
 
     return this.mapToResponse(updated);
   }
@@ -183,13 +185,20 @@ export class ReservationService {
     });
 
     // Notify admin about cancellation
-    this.notificationClient.emit('reservation.cancelled', {
-      reservationId: id,
-      userEmail: reservation.email,
-      userPhone: reservation.phone,
-      startTime: reservation.startTime,
-      reason: dto.reason || 'No reason provided',
-    });
+    this.notificationClient
+      .send<EmailOptions>('send.email', {
+        to: reservation.email,
+        subject: 'Reservation Cancelled',
+        text: `Your reservation has been cancelled. Reason: ${dto.reason}`,
+        metadata: {
+          reservation,
+        },
+      })
+      .subscribe((result) => {
+        this.logger.log(
+          `Cancellation notification sent: ${JSON.stringify(result)}`
+        );
+      });
 
     this.logger.log(`Reservation cancelled: ${id}`);
 
@@ -216,13 +225,20 @@ export class ReservationService {
     });
 
     // Notify user about rejection
-    this.notificationClient.emit('reservation.rejected', {
-      email: reservation.email,
-      phone: reservation.phone,
-      pushNotificationKey: reservation.pushNotificationKey,
-      startTime: reservation.startTime,
-      reason: dto.reason,
-    });
+    this.notificationClient
+      .send<EmailOptions>('send.email', {
+        to: reservation.email,
+        subject: 'Reservation Rejected',
+        text: `We're sorry, but your reservation for ${reservation.startTime} has been rejected. Reason: ${dto.reason}`,
+        metadata: {
+          reservation,
+        },
+      })
+      .subscribe((result) => {
+        this.logger.log(
+          `Rejection notification sent: ${JSON.stringify(result)}`
+        );
+      });
 
     this.logger.log(`Reservation rejected: ${id}`);
 

@@ -6,11 +6,15 @@ export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
 
   async sendEmail(options: EmailOptions): Promise<void> {
+    await this.sendAdminNotification(
+      options.subject,
+      options.text || options.html
+    );
     this.logger.log(`Sending email to ${options.to}`);
     console.log(
       `[EMAIL] To: ${options.to}, Subject: ${options.subject}, Content: ${
         options.text || options.html
-      }`
+      } ${JSON.stringify(options.metadata)}`
     );
     // TODO: Integrate with actual email service (SendGrid, AWS SES, etc.)
   }
@@ -29,10 +33,8 @@ export class NotificationService {
 
   async sendAdminNotification(subject: string, content: string): Promise<void> {
     const adminEmail = process.env.ADMIN_EMAIL || 'admin@beije.com';
-    await this.sendEmail({
-      to: adminEmail,
-      subject: subject,
-      text: content,
-    });
+    console.log(
+      `[ADMIN] To: ${adminEmail}, Subject: ${subject}, Content: ${content}`
+    );
   }
 }
