@@ -26,7 +26,6 @@ export class CreateReservationDto {
 
   @ApiProperty({ example: '+1234567890' })
   @IsString()
-  @IsPhoneNumber()
   phone: string;
 
   @ApiProperty()

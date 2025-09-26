@@ -17,6 +17,8 @@ import {
   GetSingleReservationResponse,
   GetReservationsResponse,
   ReservationStatus,
+  NOTIFICATION_SERVICE,
+  NotificationMessage,
 } from '@beje/common';
 import { parse, format, addMinutes } from 'date-fns';
 
@@ -26,7 +28,7 @@ export class ReservationService {
 
   constructor(
     private readonly reservationRepository: ReservationRepository,
-    @Inject('NOTIFICATION_SERVICE')
+    @Inject(NOTIFICATION_SERVICE)
     private readonly notificationClient: ClientProxy
   ) {}
 
@@ -68,6 +70,23 @@ export class ReservationService {
       });
 
       this.logger.log(`Reservation created: ${reservation.id}`);
+
+      this.notificationClient
+        .send<NotificationMessage>('send.batch', {
+          notifications: [
+            {
+              type: 'email',
+              recipient: reservation.email,
+              content: `Your reservation has been created for ${reservation.startTime}`,
+              metadata: {
+                subject: 'Reservation Created',
+              },
+            },
+          ],
+        })
+        .subscribe((result) => {
+          this.logger.log(`Notification sent: ${JSON.stringify(result)}`);
+        });
 
       return {
         status: 'success',

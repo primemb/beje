@@ -7,10 +7,7 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-
     NotificationModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}
