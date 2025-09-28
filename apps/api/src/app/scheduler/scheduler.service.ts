@@ -4,6 +4,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { NotificationOptions, ReservationStatus } from '@beje/common';
 import { addMinutes, format, isBefore } from 'date-fns';
 import { RabbitClientService } from '@beje/rabbit-client';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class SchedulerService {
@@ -31,7 +32,7 @@ export class SchedulerService {
       // Combine reservation date and time
       const [hours, minutes] = reservation.startTime.split(':').map(Number);
       const reservationDateTime = new Date(reservation.reservationDate);
-      reservationDateTime.setHours(hours, minutes, 0, 0);
+      reservationDateTime.setUTCHours(hours, minutes, 0, 0);
 
       // Check if reservation time has passed
       if (isBefore(reservationDateTime, now)) {
@@ -109,35 +110,44 @@ export class SchedulerService {
       Beije Support Team
     `;
 
-    this.rabbitClientService.notifClient.send<NotificationOptions>(
-      'send.email',
-      {
-        type: 'email',
-        to: reservation.email,
-        subject,
-        text: content,
-      }
+    await firstValueFrom(
+      this.rabbitClientService.notifClient.send<NotificationOptions>(
+        'send.email',
+        {
+          type: 'email',
+          to: reservation.email,
+          subject,
+          text: content,
+        }
+      )
     );
   }
 
   private async sendSmsNotification(reservation: any): Promise<void> {
     const content = `Reminder: Your call is scheduled in 5 minutes at ${reservation.startTime}. Be ready! - Beije Support`;
-    this.rabbitClientService.notifClient.send<NotificationOptions>('send.sms', {
-      type: 'sms',
-      to: reservation.phone,
-      text: content,
-    });
+    await firstValueFrom(
+      this.rabbitClientService.notifClient.send<NotificationOptions>(
+        'send.sms',
+        {
+          type: 'sms',
+          to: reservation.phone,
+          text: content,
+        }
+      )
+    );
   }
 
   private async sendPushNotification(reservation: any): Promise<void> {
     const content = `Your call starts in 1 minute at ${reservation.startTime}!`;
-    this.rabbitClientService.notifClient.send<NotificationOptions>(
-      'send.push',
-      {
-        type: 'push',
-        to: reservation.pushNotificationKey,
-        text: content,
-      }
+    await firstValueFrom(
+      this.rabbitClientService.notifClient.send<NotificationOptions>(
+        'send.push',
+        {
+          type: 'push',
+          to: reservation.pushNotificationKey,
+          text: content,
+        }
+      )
     );
   }
 }
