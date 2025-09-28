@@ -7,6 +7,7 @@
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "emitDeclarationOnly": true,
     "forceConsistentCasingInFileNames": true,
+    "strict": true,
     "types": ["node"],
     "target": "es2021",
     "strictNullChecks": true,
@@ -17,5 +18,9 @@
     "emitDecoratorMetadata": true
   },
   "include": ["src/**/*.ts"],
-  "references": []
+  "references": [
+    {
+      "path": "../common/tsconfig.lib.json"
+    }
+  ]
 }

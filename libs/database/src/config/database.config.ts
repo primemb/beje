@@ -12,7 +12,8 @@ export const DB_CONFIG = registerAs(
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
+    autoLoadEntities: true,
     synchronize: process.env.NODE_ENV !== 'production',
-    logging: process.env.NODE_ENV === 'development',
+    logging: false,
   })
 );

@@ -3,28 +3,13 @@ import { Reservation } from './entities/reservation.entity';
 import { ReservationService } from './reservation.service';
 import { ReservationController } from './reservation.controller';
 import { ReservationRepository } from './reservation.repository';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { NOTIFICATION_QUEUE, NOTIFICATION_SERVICE } from '@beje/common';
+import { DatabaseModule } from '@beje/database';
+import { BejeRabbitClientModule } from '@beje/rabbit-client';
 
 @Module({
-  imports: [
-    ClientsModule.register([
-      {
-        name: NOTIFICATION_SERVICE,
-        transport: Transport.RMQ,
-        options: {
-          urls: [
-            process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672',
-          ],
-          queue: NOTIFICATION_QUEUE,
-          queueOptions: { durable: true },
-        },
-      },
-    ]),
-    TypeOrmModule.forFeature([Reservation]),
-  ],
+  imports: [BejeRabbitClientModule, DatabaseModule.forFeature([Reservation])],
   controllers: [ReservationController],
   providers: [ReservationService, ReservationRepository],
+  exports: [ReservationService, ReservationRepository],
 })
 export class ReservationModule {}

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, Not } from 'typeorm';
+import { Repository, Between, Not, DeepPartial } from 'typeorm';
 import { Reservation } from './entities/reservation.entity';
 import { ReservationStatus } from '@beje/common';
 
@@ -51,7 +51,7 @@ export class ReservationRepository {
 
   async update(
     id: string,
-    updateData: Partial<Reservation>
+    updateData: DeepPartial<Reservation>
   ): Promise<Reservation | null> {
     await this.repository.update(id, updateData);
     return this.findById(id);

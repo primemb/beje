@@ -30,7 +30,7 @@
           "watchDepsName": "watch-deps"
         }
       },
-      "exclude": ["libs/database/*", "libs/common/*"]
+      "exclude": ["libs/database/*", "libs/common/*", "libs/rabbit-client/*"]
     },
     {
       "plugin": "@nx/webpack/plugin",
@@ -65,7 +65,7 @@
     },
     {
       "plugin": "@nx/js/typescript",
-      "include": ["libs/database/*", "libs/common/*"],
+      "include": ["libs/database/*", "libs/common/*", "libs/rabbit-client/*"],
       "options": {
         "typecheck": {
           "targetName": "typecheck"

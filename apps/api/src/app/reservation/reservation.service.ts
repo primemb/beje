@@ -9,7 +9,6 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { ReservationRepository } from './reservation.repository';
 import { CreateReservationDto } from './dto/create-reservation.dto';
-import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { CancelReservationDto } from './dto/cancel-reservation.dto';
 import { RejectReservationDto } from './dto/reject-reservation.dto';
 import {
@@ -17,10 +16,12 @@ import {
   GetSingleReservationResponse,
   GetReservationsResponse,
   ReservationStatus,
-  NOTIFICATION_SERVICE,
   NotificationOptions,
 } from '@beje/common';
 import { parse, format, addMinutes } from 'date-fns';
+import { Reservation } from './entities/reservation.entity';
+import { DeepPartial } from 'typeorm';
+import { RabbitClientService } from '@beje/rabbit-client';
 
 @Injectable()
 export class ReservationService {
@@ -28,9 +29,19 @@ export class ReservationService {
 
   constructor(
     private readonly reservationRepository: ReservationRepository,
-    @Inject(NOTIFICATION_SERVICE)
-    private readonly notificationClient: ClientProxy
+    private readonly rabbitClientService: RabbitClientService
   ) {}
+
+  async markNotificationSent(
+    id: string,
+    notificationType: 'email' | 'sms' | 'push'
+  ): Promise<void> {
+    await this.reservationRepository.markNotificationSent(id, notificationType);
+  }
+
+  async getUpcomingReservations(minutes: number): Promise<Reservation[]> {
+    return this.reservationRepository.findUpcomingReservations(minutes);
+  }
 
   async createReservation(
     dto: CreateReservationDto
@@ -72,7 +83,7 @@ export class ReservationService {
       this.logger.log(`Reservation created: ${reservation.id}`);
 
       // Send email notification for reservation creation
-      this.notificationClient
+      this.rabbitClientService.notifClient
         .send<NotificationOptions>('send.email', {
           type: 'create',
           to: reservation.email,
@@ -116,7 +127,7 @@ export class ReservationService {
 
   async updateReservation(
     id: string,
-    dto: UpdateReservationDto
+    dto: DeepPartial<Reservation>
   ): Promise<GetSingleReservationResponse> {
     const reservation = await this.reservationRepository.findById(id);
     if (!reservation) {
@@ -150,7 +161,7 @@ export class ReservationService {
     const updated = await this.reservationRepository.update(id, dto);
 
     // Notify user about update
-    this.notificationClient
+    this.rabbitClientService.notifClient
       .send<NotificationOptions>('send.email', {
         type: 'update',
         to: updated.email,
@@ -187,7 +198,7 @@ export class ReservationService {
     });
 
     // Notify admin about cancellation
-    this.notificationClient
+    this.rabbitClientService.notifClient
       .send<NotificationOptions>('send.email', {
         type: 'cancel',
         to: reservation.email,
@@ -228,7 +239,7 @@ export class ReservationService {
     });
 
     // Notify user about rejection
-    this.notificationClient
+    this.rabbitClientService.notifClient
       .send<NotificationOptions>('send.email', {
         type: 'reject',
         to: reservation.email,

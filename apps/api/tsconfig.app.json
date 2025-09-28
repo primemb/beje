@@ -22,6 +22,9 @@
   ],
   "references": [
     {
+      "path": "../../libs/rabbit-client/tsconfig.lib.json"
+    },
+    {
       "path": "../../libs/common/tsconfig.lib.json"
     },
     {
