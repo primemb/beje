@@ -4,6 +4,12 @@
 
 please update .env file
 
+## install dependencies
+
+```sh
+npm install
+```
+
 ## Run tasks
 
 To run the dev server for your app, use:
