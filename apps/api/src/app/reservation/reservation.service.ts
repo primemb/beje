@@ -18,7 +18,7 @@ import {
   GetReservationsResponse,
   ReservationStatus,
   NOTIFICATION_SERVICE,
-  EmailOptions,
+  NotificationOptions,
 } from '@beje/common';
 import { parse, format, addMinutes } from 'date-fns';
 
@@ -73,7 +73,8 @@ export class ReservationService {
 
       // Send email notification for reservation creation
       this.notificationClient
-        .send('send.email', {
+        .send<NotificationOptions>('send.email', {
+          type: 'create',
           to: reservation.email,
           subject: 'Reservation Created',
           text: `Your reservation has been created for ${reservation.startTime}. Reservation ID: ${reservation.id}`,
@@ -150,7 +151,8 @@ export class ReservationService {
 
     // Notify user about update
     this.notificationClient
-      .send<EmailOptions>('send.email', {
+      .send<NotificationOptions>('send.email', {
+        type: 'update',
         to: updated.email,
         subject: 'Reservation Updated',
         text: `Your reservation has been updated. new start time: ${updated.startTime}`,
@@ -186,7 +188,8 @@ export class ReservationService {
 
     // Notify admin about cancellation
     this.notificationClient
-      .send<EmailOptions>('send.email', {
+      .send<NotificationOptions>('send.email', {
+        type: 'cancel',
         to: reservation.email,
         subject: 'Reservation Cancelled',
         text: `Your reservation has been cancelled. Reason: ${dto.reason}`,
@@ -226,7 +229,8 @@ export class ReservationService {
 
     // Notify user about rejection
     this.notificationClient
-      .send<EmailOptions>('send.email', {
+      .send<NotificationOptions>('send.email', {
+        type: 'reject',
         to: reservation.email,
         subject: 'Reservation Rejected',
         text: `We're sorry, but your reservation for ${reservation.startTime} has been rejected. Reason: ${dto.reason}`,

@@ -1,7 +1,7 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { NotificationService } from './notification.service';
-import type { EmailOptions, NotificationMessage } from '@beje/common';
+import type { NotificationOptions, NotificationMessage } from '@beje/common';
 
 @Controller()
 export class NotificationController {
@@ -11,7 +11,7 @@ export class NotificationController {
 
   @MessagePattern('send.email')
   async sendEmail(
-    @Payload() emailOptions: EmailOptions
+    @Payload() emailOptions: NotificationOptions
   ): Promise<{ success: boolean; message: string }> {
     try {
       this.logger.log(`Received email request for ${emailOptions.to}`);
@@ -26,12 +26,12 @@ export class NotificationController {
 
   @MessagePattern('send.sms')
   async sendSms(
-    @Payload() data: { receiver: string; content: string }
+    @Payload() data: NotificationOptions
   ): Promise<{ success: boolean; message: string }> {
     try {
-      this.logger.log(`Received SMS request for ${data.receiver}`);
-      await this.notificationService.sendSms(data.receiver, data.content);
-      this.logger.log(`SMS sent successfully to ${data.receiver}`);
+      this.logger.log(`Received SMS request for ${data.to}`);
+      await this.notificationService.sendSms(data.to, data.text);
+      this.logger.log(`SMS sent successfully to ${data.to}`);
       return { success: true, message: 'SMS sent successfully' };
     } catch (error) {
       this.logger.error(`Failed to send SMS: ${error.message}`);
@@ -41,15 +41,12 @@ export class NotificationController {
 
   @MessagePattern('send.push')
   async sendPushNotification(
-    @Payload() data: { key: string; content: string }
+    @Payload() data: NotificationOptions
   ): Promise<{ success: boolean; message: string }> {
     try {
-      this.logger.log(`Received push notification request for ${data.key}`);
-      await this.notificationService.sendPushNotification(
-        data.key,
-        data.content
-      );
-      this.logger.log(`Push notification sent successfully to ${data.key}`);
+      this.logger.log(`Received push notification request for ${data.to}`);
+      await this.notificationService.sendPushNotification(data.to, data.text);
+      this.logger.log(`Push notification sent successfully to ${data.to}`);
       return { success: true, message: 'Push notification sent successfully' };
     } catch (error) {
       this.logger.error(`Failed to send push notification: ${error.message}`);
@@ -59,14 +56,11 @@ export class NotificationController {
 
   @MessagePattern('send.admin')
   async sendAdminNotification(
-    @Payload() data: { subject: string; content: string }
+    @Payload() data: NotificationOptions
   ): Promise<{ success: boolean; message: string }> {
     try {
       this.logger.log(`Received admin notification request`);
-      await this.notificationService.sendAdminNotification(
-        data.subject,
-        data.content
-      );
+      await this.notificationService.sendAdminNotification(data);
       this.logger.log(`Admin notification sent successfully`);
       return { success: true, message: 'Admin notification sent successfully' };
     } catch (error) {
@@ -89,39 +83,42 @@ export class NotificationController {
         switch (notification.type) {
           case 'email':
             await this.notificationService.sendEmail({
-              to: notification.recipient,
-              subject: notification.metadata?.subject || 'Notification',
-              text: notification.content,
+              type: notification.notificationOptions.type,
+              to: notification.notificationOptions.to,
+              subject: notification.notificationOptions.subject,
+              text: notification.notificationOptions.text,
+              html: notification.notificationOptions.html,
+              metadata: notification.notificationOptions.metadata,
             });
             break;
           case 'sms':
             await this.notificationService.sendSms(
-              notification.recipient,
-              notification.content
+              notification.notificationOptions.to,
+              notification.notificationOptions.text
             );
             break;
           case 'push':
             await this.notificationService.sendPushNotification(
-              notification.recipient,
-              notification.content
+              notification.notificationOptions.to,
+              notification.notificationOptions.text
             );
             break;
         }
         results.push({
           type: notification.type,
-          recipient: notification.recipient,
+          recipient: notification.notificationOptions.to,
           success: true,
         });
         this.logger.log(
-          `${notification.type} notification sent to ${notification.recipient}`
+          `${notification.type} notification sent to ${notification.notificationOptions.to}`
         );
       } catch (error) {
         this.logger.error(
-          `Failed to send ${notification.type} notification to ${notification.recipient}: ${error.message}`
+          `Failed to send ${notification.type} notification to ${notification.notificationOptions.to}: ${error.message}`
         );
         results.push({
           type: notification.type,
-          recipient: notification.recipient,
+          recipient: notification.notificationOptions.to,
           success: false,
           error: error.message,
         });

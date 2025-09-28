@@ -1,11 +1,10 @@
 export interface NotificationMessage {
   type: 'email' | 'sms' | 'push';
-  recipient: string;
-  content: string;
-  metadata?: any;
+  notificationOptions: NotificationOptions;
 }
 
-export interface EmailOptions {
+export interface NotificationOptions {
+  type: 'create' | 'update' | 'cancel' | 'reject';
   to: string;
   subject: string;
   text?: string;

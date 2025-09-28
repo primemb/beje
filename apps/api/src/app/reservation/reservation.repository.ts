@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, Not } from 'typeorm';
 import { Reservation } from './entities/reservation.entity';
-import { startOfDay, endOfDay } from 'date-fns';
 import { ReservationStatus } from '@beje/common';
 
 @Injectable()
