@@ -4,9 +4,7 @@ import {
   NotFoundException,
   ConflictException,
   Logger,
-  Inject,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
 import { ReservationRepository } from './reservation.repository';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { CancelReservationDto } from './dto/cancel-reservation.dto';
